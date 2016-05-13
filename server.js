@@ -57,7 +57,7 @@ router.route('/bears')
 			}
 			res.json({ message : 'Bear created!' });
 		});
-	});
+	})
 
 	// get all the bears (accessed at GET http://localhost:8080/api/bears)
     .get(function(req, res) {
