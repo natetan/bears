@@ -4,9 +4,9 @@
 // =============================================================================
 
 // call the packages we need
-var express    = require('express');        // call express
+var express    = require('express');        // call express (for routing)
 var app        = express();                 // define our app using express
-var bodyParser = require('body-parser');
+var bodyParser = require('body-parser');    // parses the form data in a POST or PUT request
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -16,7 +16,12 @@ app.use(bodyParser.json());
 var port = process.env.PORT || 8080;        // set our port
 
 var mongoose   = require('mongoose');
-mongoose.connect('mongodb://node:node@novus.modulusmongo.net:27017/Iganiq8o');
+mongoose.connect('mongodb://localhost:27017/bearDB', function(err) {
+	if (err) {
+		console.log("error in mongo connection", err);
+	}
+	console.log("mongo connection finished");
+});
 
 var Bear = require('./app/models/bear');
 
@@ -49,7 +54,8 @@ router.route('/bears')
 
 		var bear = new Bear();      
 		bear.name = req.body.name; // sets the bear's name from request
-
+		bear.type = req.body.type;
+		bear.age  = req.body.age;
 		// save the bear and check for errors
 		bear.save(function(err) {
 			if (err) {
@@ -96,14 +102,25 @@ router.route('/bears/:bear_id')
 
             // save the bear
             bear.save(function(err) {
-                if (err)
+                if (err) {
                     res.send(err);
-
+                }
                 res.json({ message: 'Bear updated!' });
             });
 
         });
-    });
+    })
+
+    .delete(function(req, res) {
+    	Bear.remove({
+    		_id: req.params.bear_id
+    	}, function(err, bear) {
+    		if (err) {
+    			res.send(err);
+    		}
+    		res.json({ message: 'Bear deleted'});
+    	});
+    })
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
